@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: xiangwei-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 开启从注册中心动态创建路由的功能
+      routes:
+        - id: auth-route
+          uri: lb://xiangwei-auth
+          predicates:
+            - Path=/user/**
+
+        - id: order-route
+          uri: lb://xiangwei-order
+          predicates:
+            - Path=/order/**, /cart/**, /delivery/**
+
+        - id: commodity-route
+          uri: lb://xiangwei-commodity
+          predicates:
+            - Path=/product/**, /product/review/**
+
+        - id: system-route
+          uri: lb://xiangwei-system
+          predicates:
+            - Path=/notice/**
+
+        - id: service-route
+          uri: lb://xiangwei-service
+          predicates:
+            - Path=/get_post_signature_for_oss_upload/**

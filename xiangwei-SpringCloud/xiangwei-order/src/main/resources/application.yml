@@ -1,0 +1,45 @@
+server:
+  port: 9094
+seata:
+  enabled: true
+  tx-service-group: order_tx_group
+  service:
+    vgroup-mapping:
+      order_tx_group: default  # 这里的 default 是 Seata 服务端默认的集群名称
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group: SEATA_GROUP
+#  config:
+#    type: nacos
+#    nacos:
+#      server-addr: 127.0.0.1:8848
+#      group: SEATA_GROUP
+spring:
+  application:
+    name: xiangwei-order # 注册到 Nacos 的名字
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/xiangwei_order?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
