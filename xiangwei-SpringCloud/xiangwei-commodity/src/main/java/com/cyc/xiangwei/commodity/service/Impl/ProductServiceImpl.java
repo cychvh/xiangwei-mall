@@ -14,11 +14,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public void addProduct(Product product, String username, Integer userId) {
-        if (!StringUtils.hasText(product.getImageurl())) {
-            throw new RuntimeException("商品图片不能为空");
-        }
-
-
         product.setMerchantId(userId);
         baseMapper.insert(product);
     }
@@ -29,7 +24,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         if (dbProduct == null) {
             throw new RuntimeException("商品不存在");
         }
-
 
         if (type != 1 || !userId.equals(dbProduct.getMerchantId())) {
             throw new RuntimeException("无权删除该商品");
@@ -45,7 +39,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         if (dbProduct == null) {
             throw new RuntimeException("商品不存在");
         }
-
 
         if (type != 1 || !userId.equals(dbProduct.getMerchantId())) {
             throw new RuntimeException("无权修改该商品");

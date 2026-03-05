@@ -11,10 +11,16 @@ import java.util.List;
 
 public interface OrderService extends IService<Order> {
     IPage<Order> getOrderByOrderId(String productName, Integer userId, Integer PageNum, Integer PageSize);
+
     List<OrderItem> getOrderItemsByOrderId(Integer orderId, Integer userId);
+
     void addOrder(Order order, List<OrderItem> orderItems, Integer userId);
-    public IPage<OrderVo> getMerchantOrderList(Integer merchantId, Integer pageNum, Integer pageSize,Integer status,Integer orderId);
-    public List<OrderItem> getMerchantOrderItems(Integer merchantId, Integer orderId);
-    public void confirmReceiptService(Integer orderId,Integer userId);
-    void after(Integer orderId,  OrderDelivery orderDelivery);
+
+    IPage<OrderVo> getMerchantOrderList(Integer merchantId, Integer pageNum, Integer pageSize, Integer status, Integer orderId);
+
+    List<OrderItem> getMerchantOrderItems(Integer merchantId, Integer orderId);
+
+    void confirmReceiptService(Integer orderId, Integer userId);
+
+    void after(Integer orderId, OrderDelivery orderDelivery);
 }

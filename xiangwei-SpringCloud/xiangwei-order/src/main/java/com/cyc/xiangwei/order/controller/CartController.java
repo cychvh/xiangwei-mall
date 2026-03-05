@@ -3,6 +3,7 @@ package com.cyc.xiangwei.order.controller;
 import com.cyc.xiangwei.common.utils.Result;
 import com.cyc.xiangwei.order.service.CartService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class CartController {
 
     @PostMapping("/add")
     public Result<?> addCart(@RequestParam Integer productId,
-                             @RequestParam(defaultValue = "1") Integer quantity,
+                             @RequestParam(defaultValue = "1") @Min(value = 1, message = "加购数量必须大于0")Integer quantity,
                              HttpServletRequest request) {
 
         // 微服务改造：统一从 Header 中获取用户 ID 和类型

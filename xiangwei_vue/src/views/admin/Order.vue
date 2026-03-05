@@ -18,13 +18,28 @@
       <el-table :data="tableData" v-loading="loading" border>
         <el-table-column prop="id" label="订单编号" width="140" />
         <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="totalAmount" label="订单金额" width="120" />
-        <el-table-column prop="status" label="订单状态" width="100">
+        
+        <el-table-column prop="totalAmount" label="订单金额" width="120">
           <template #default="scope">
-            <el-tag>{{ statusText(scope.row.status) }}</el-tag>
+            <span style="color: #ff4d4f; font-weight: bold;">
+              ¥{{ Number(scope.row.totalAmount || 0).toFixed(2) }}
+            </span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+
+        <el-table-column prop="status" label="订单状态" width="100">
+          <template #default="scope">
+            <el-tag :type="statusType(scope.row.status)">
+              {{ statusText(scope.row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        
+        <el-table-column prop="createTime" label="创建时间" width="180">
+          <template #default="scope">
+            {{ formatTime(scope.row.createTime) }}
+          </template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination">
@@ -38,7 +53,6 @@
           @size-change="fetchList"
         />
       </div>
-      <!-- TBD: admin order items endpoint not defined in docs/api-report.md -->
     </el-card>
   </div>
 </template>
@@ -83,12 +97,28 @@ const fetchList = async () => {
   }
 }
 
+// 🚀 核心修改：对齐系统的全套状态文本
 const statusText = (s) => ({
-  1: '待支付',
-  2: '已支付',
+  1: '已支付',
+  2: '已发货',
   3: '已完成',
-  0: '已取消'
+  0: '已取消',
+  4: '售后中',
+  5: '已退款'
 }[s] || '未知状态')
+
+// 🚀 核心修改：根据状态返回对应的 Element Plus 颜色标签类型
+const statusType = (s) => ({
+  1: 'warning',   // 橘黄色
+  2: 'primary',   // 蓝色
+  3: 'success',   // 绿色
+  0: 'info',      // 灰色
+  4: 'danger',    // 红色
+  5: 'info'       // 灰色
+}[s] || 'info')
+
+// 顺手增加一个格式化时间的函数，让显示更好看
+const formatTime = (t) => (t ? String(t).replace('T', ' ') : '')
 
 fetchList()
 </script>

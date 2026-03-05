@@ -11,6 +11,7 @@ import com.cyc.xiangwei.auth.service.UserService;
 import com.cyc.xiangwei.common.utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/user/login")
-    public Result<?> login(@RequestBody User user) {
+    public Result<?> login(@Validated @RequestBody User user) {
         Map<String, Object> map = userService.Login(user.getUsername(), user.getPassword());
         if(map == null) {
             return Result.error("500","用户名或密码不正确");
@@ -34,7 +35,7 @@ public class UserController {
     }
 
     @PostMapping("/user/refresh")
-    public Result<?> refresh(@RequestBody RefreshTokenRequest req) {
+    public Result<?> refresh(@Validated @RequestBody RefreshTokenRequest req) {
         try {
             Map<String, Object> refresh = userService.refresh(req);
             return Result.success(refresh);
@@ -45,7 +46,7 @@ public class UserController {
 
 
     @PostMapping("/user/register")
-    public Result<?> Register(@RequestBody User user) {
+    public Result<?> Register(@Validated @RequestBody User user) {
         boolean register = userService.Register(user);
         if (register) {
             return Result.success();

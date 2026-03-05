@@ -3,6 +3,7 @@ package com.cyc.xiangwei.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,11 +19,12 @@ public class Notice {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
-    // 新增：公告标题
+
+    @NotBlank(message = "公告标题不能为空")
     private String title;
-
+    @NotBlank(message = "公告内容不能为空")
     private String content;
-
+    @NotBlank(message = "公告发布类型不能为空")
     private String type;
 
     // 映射数据库 create_time

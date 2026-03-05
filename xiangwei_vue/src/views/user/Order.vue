@@ -326,7 +326,7 @@ const openAfterDialog = (row) => {
   afterVisible.value = true
 }
 
-// 🚀 新增：提交售后请求
+
 const submitAfter = async () => {
   if (!afterForm.expressCompany.trim() || !afterForm.expressNo.trim()) {
     ElMessage.warning('请完整填写退货的快递公司和单号')
@@ -337,6 +337,7 @@ const submitAfter = async () => {
   try {
     // 严格匹配您的后端参数：orderId 为 params，orderDelivery 为 body
     const res = await request.put('/order/after', {
+      orderId: afterForm.orderId,
       expressCompany: afterForm.expressCompany,
       expressNo: afterForm.expressNo
     }, {

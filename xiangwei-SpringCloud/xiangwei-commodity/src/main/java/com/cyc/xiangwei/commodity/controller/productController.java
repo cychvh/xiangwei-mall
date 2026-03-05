@@ -7,6 +7,7 @@ import com.cyc.xiangwei.commodity.service.ProductService;
 import com.cyc.xiangwei.common.utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -101,8 +102,6 @@ public class productController {
 
     @GetMapping("/user/productOne/{id}")
     public Result<?> productOne(@PathVariable Integer id, HttpServletRequest request) {
-        // 商品详情通常是全网公开的，或者是为了给订单微服务(Feign)提供数据。
-        // 因此这里【去掉所有 type 限制】，任何人/任何微服务都可以查商品信息。
 
         LambdaQueryWrapper<Product> query = new LambdaQueryWrapper<>();
         query.eq(Product::getId, id);
@@ -115,25 +114,16 @@ public class productController {
     }
 
     @PostMapping("/add")
-    public Result<?> addProduct(@RequestBody Product product, HttpServletRequest request) {
-
+    public Result<?> addProduct(@Validated @RequestBody Product product, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
-        String username = request.getHeader("username"); // 假设网关也把 username 放进了 header
+        String username = request.getHeader("username");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "未登录");
-        }
-        if (type == null || type != 1) {
-            return Result.error("403", "非商家无权操作");
-        }
-        try {
-            // 如果 username 没有从网关传过来，可以给个默认值或者通过 UserFeignClient 去查
-            username = StringUtils.hasText(username) ? username : "商家" + userId;
-            productService.addProduct(product, username, userId);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        if (userId == null) { return Result.error("401", "未登录"); }
+        if (type == null || type != 1) { return Result.error("403", "非商家无权操作"); }
+
+        username = StringUtils.hasText(username) ? username : "商家" + userId;
+        productService.addProduct(product, username, userId);
         return Result.success();
     }
 
@@ -156,22 +146,16 @@ public class productController {
     }
 
     @PutMapping("/update")
-    public Result<?> updateProduct(@RequestBody Product product, HttpServletRequest request) {
-
+    public Result<?> updateProduct(@Validated @RequestBody Product product, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
         String username = request.getHeader("username");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "未登录");
-        }
+        if (userId == null) { return Result.error("401", "未登录"); }
 
-        try {
-            username = StringUtils.hasText(username) ? username : "商家" + userId;
-            productService.updateProduct(product, username, userId, type);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+
+        username = StringUtils.hasText(username) ? username : "商家" + userId;
+        productService.updateProduct(product, username, userId, type);
         return Result.success();
     }
 

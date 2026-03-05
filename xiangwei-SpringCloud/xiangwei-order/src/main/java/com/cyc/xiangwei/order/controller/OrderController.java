@@ -11,6 +11,7 @@ import com.cyc.xiangwei.order.entity.OrderItem;
 import com.cyc.xiangwei.order.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,26 +96,19 @@ public class OrderController {
 
     // 买家下单
     @PostMapping("/addOrder")
-    public Result<?> addOrder(@RequestBody OrderDTO orderDTO, HttpServletRequest request) {
+    public Result<?> addOrder(@Validated @RequestBody OrderDTO orderDTO, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
         if (userId == null || type == null || type != 2) {
             return Result.error("405", "权限不足，仅买家可下单");
         }
-        if (orderDTO == null) {
-            return Result.error("500", "添加的数据为空");
-        }
+
 
         Order order = orderDTO.getOrder();
         List<OrderItem> orderItems = orderDTO.getOrderItems();
-
-        try {
-            orderService.addOrder(order, orderItems, userId);
-            return Result.success();
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        orderService.addOrder(order, orderItems, userId);
+        return Result.success();
     }
 
     // 商家查询订单列表
@@ -133,7 +127,7 @@ public class OrderController {
         }
 
         return Result.success(
-                orderService.getMerchantOrderList(merchantId, pageNum, pageSize,status,orderId)
+                orderService.getMerchantOrderList(merchantId, pageNum, pageSize, status, orderId)
         );
     }
 
@@ -181,7 +175,7 @@ public class OrderController {
 
     // 售后申请
     @PutMapping("/after")
-    public Result<?> after(@RequestParam Integer orderId, @RequestBody OrderDelivery orderDelivery, HttpServletRequest request) {
+    public Result<?> after(@RequestParam Integer orderId, @Validated @RequestBody OrderDelivery orderDelivery, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
@@ -193,7 +187,7 @@ public class OrderController {
         }
 
         // 您的 after 逻辑目前在 Controller 里是空的，后续可以调用 orderService.after()
-        orderService.after(orderId,orderDelivery);
+        orderService.after(orderId, orderDelivery);
         return Result.success();
     }
 

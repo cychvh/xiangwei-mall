@@ -7,6 +7,7 @@ import com.cyc.xiangwei.order.entity.OrderDelivery;
 import com.cyc.xiangwei.order.service.DeliveryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,30 +35,18 @@ public class DeliveryController {
 
     // 1. 添加物流 (发货)
     @PostMapping("/ship")
-    public Result<?> ship(@RequestBody OrderDelivery orderDelivery,
+    public Result<?> ship(@Validated @RequestBody OrderDelivery orderDelivery,
                           HttpServletRequest request) {
 
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
-
-        System.out.println("merchantId=" + merchantId + ", type=" + type);
 
         // 权限校验：必须登录，且必须是商家 (type == 1)
         if (merchantId == null || type == null || type != 1) {
             return Result.error("405", "权限不足，非商家无权发货");
         }
 
-        try {
-            deliveryService.shipOrder(
-                    orderDelivery.getOrderId(),
-                    merchantId,
-                    orderDelivery.getExpressCompany(),
-                    orderDelivery.getExpressNo()
-            );
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
-
+        deliveryService.shipOrder(orderDelivery.getOrderId(), merchantId, orderDelivery.getExpressCompany(), orderDelivery.getExpressNo());
         return Result.success();
     }
 
@@ -101,22 +90,11 @@ public class DeliveryController {
             return Result.error("405", "权限不足，非商家无权修改物流");
         }
 
-        // 基本参数校验（只校验“有没有”）
-        if (orderDelivery.getOrderId() == null
-                || !StringUtils.hasText(orderDelivery.getExpressCompany())
-                || !StringUtils.hasText(orderDelivery.getExpressNo())) {
-            return Result.error("400", "物流信息不完整");
-        }
-
         // 强制使用当前商户 ID，防止商家篡改别人的物流
         orderDelivery.setMerchantId(merchantId);
 
         // 核心业务全部交给 Service
-        try {
-            deliveryService.addOrUpdateDelivery(orderDelivery);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        deliveryService.addOrUpdateDelivery(orderDelivery);
 
         return Result.success();
     }

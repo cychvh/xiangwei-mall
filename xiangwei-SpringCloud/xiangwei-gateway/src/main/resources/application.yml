@@ -21,7 +21,7 @@ spring:
         - id: order-route
           uri: lb://xiangwei-order
           predicates:
-            - Path=/order/**, /cart/**, /delivery/**
+            - Path=/order/**, /cart/**, /delivery/**,/statistics/**
 
         - id: commodity-route
           uri: lb://xiangwei-commodity

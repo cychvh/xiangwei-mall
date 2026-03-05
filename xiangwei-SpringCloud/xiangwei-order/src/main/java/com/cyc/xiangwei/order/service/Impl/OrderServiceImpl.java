@@ -74,20 +74,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (userId == null) {
             throw new RuntimeException("用户未登录或 userId 为空");
         }
-        if (orderItems == null || orderItems.isEmpty()) {
-            throw new RuntimeException("订单商品不能为空");
-        }
 
         // 1. 按 merchantId 分组
         Map<Integer, List<OrderItem>> merchantMap = new HashMap<>();
 
         for (OrderItem item : orderItems) {
-            if (item == null || item.getProductId() == null) {
-                throw new RuntimeException("订单项数据不完整：productId 为空");
-            }
-            if (item.getQuantity() == null || item.getQuantity() <= 0) {
-                throw new RuntimeException("商品数量必须大于 0");
-            }
 
             // 1.1 查询商品
 //            Product dbProduct = productService.getById(item.getProductId());
@@ -287,10 +278,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order.getStatus() != 3) {
             throw new RuntimeException("订单状态不允许售后");
         }
-        if (orderDelivery == null || orderDelivery.getExpressNo() == null || orderDelivery.getExpressCompany() == null) {
-            throw new RuntimeException("退货物流信息不完整");
-        }
-
 
         boolean existsReturn = deliveryService.count(
                 new LambdaQueryWrapper<OrderDelivery>()

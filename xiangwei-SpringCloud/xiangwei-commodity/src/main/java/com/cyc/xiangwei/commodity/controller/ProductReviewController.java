@@ -7,6 +7,7 @@ import com.cyc.xiangwei.commodity.service.ProductReviewService;
 import com.cyc.xiangwei.common.utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,18 +36,15 @@ public class ProductReviewController {
      * 用户发表商品评论
      */
     @PostMapping("/add")
-    public Result<?> addReview(@RequestBody ProductReview review, HttpServletRequest request) {
+    public Result<?> addReview(@Validated @RequestBody ProductReview review, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
         if (userId == null) {
             return Result.error("401", "未登录，无法评价");
         }
 
-        try {
-            reviewService.addReview(review, userId);
-            return Result.success("评价成功");
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        // 删除了 try-catch
+        reviewService.addReview(review, userId);
+        return Result.success("评价成功");
     }
 
     /**

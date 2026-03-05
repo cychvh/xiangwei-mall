@@ -7,11 +7,13 @@ import com.cyc.xiangwei.common.utils.Result;
 import com.cyc.xiangwei.system.entity.Notice;
 import com.cyc.xiangwei.system.service.NoticeService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-// 优化：提取公共路径到类头上，下面方法里的路径更简洁 (可选，这里为了兼容您的前端，保持原样)
+@Validated
 public class NoticeController {
 
     private final NoticeService noticeService;
@@ -33,21 +35,6 @@ public class NoticeController {
         }
     }
 
-//    // 1. 用户和商家获取公告 (只看已发布的)
-//    @GetMapping("/notice/getNotice")
-//    public Result<?> getNotice(HttpServletRequest request,
-//                               @RequestParam(defaultValue = "1") Integer pageNum,
-//                               @RequestParam(defaultValue = "5") Integer pageSize) {
-//
-//        // 微服务改造：从 Header 中获取数据
-//        Integer type = getIntegerHeader(request, "type");
-//        if (type == null) {
-//            return Result.error("401", "未登录");
-//        }
-//
-//        IPage<Notice> noticeList = noticeService.getNoticeList(pageNum, pageSize, type);
-//        return Result.success(noticeList);
-//    }
 
     // 统一获取公告列表接口 (管理员/用户/商家 通用)
     @GetMapping("/notice/list")
@@ -87,7 +74,7 @@ public class NoticeController {
 
     // 3. 管理员添加公告
     @PostMapping("/notice/addNotice")
-    public Result<?> addNotice(@RequestBody Notice notice, HttpServletRequest request) {
+    public Result<?> addNotice(@Validated @RequestBody Notice notice, HttpServletRequest request) {
         Integer type = getIntegerHeader(request, "type");
         Integer userId = getIntegerHeader(request, "userId");
 
@@ -110,15 +97,11 @@ public class NoticeController {
 
     // 4. 管理员删除公告
     @DeleteMapping("/notice/deleteNotice")
-    public Result<?> deleteNotice(@RequestParam Integer id, HttpServletRequest request) {
+    public Result<?> deleteNotice(@RequestParam @NotNull(message = "公告ID不能为空")Integer id, HttpServletRequest request) {
         Integer type = getIntegerHeader(request, "type");
 
         if (type == null || type != 0) {
             return Result.error("405", "权限不够");
-        }
-
-        if (id == null) {
-            return Result.error("400", "公告ID不能为空");
         }
 
         boolean b = noticeService.removeById(id);
@@ -130,7 +113,7 @@ public class NoticeController {
 
     // 5. 管理员更新公告
     @PutMapping("/notice/updateNotice")
-    public Result<?> updateNotice(@RequestBody Notice notice, HttpServletRequest request) {
+    public Result<?> updateNotice(@Validated @RequestBody Notice notice, HttpServletRequest request) {
         Integer type = getIntegerHeader(request, "type");
 
         if (type == null || type != 0) {
