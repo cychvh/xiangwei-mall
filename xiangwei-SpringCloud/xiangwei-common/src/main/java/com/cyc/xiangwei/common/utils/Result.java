@@ -51,28 +51,43 @@ public class Result<T> {
                 ", data=" + data +
                 '}';
     }
-    public static Result success(){
-        Result result = new Result();
-        result.setCode("200");
-        result.setMsg("success");
+    public static <T> Result<T> success() {
+        Result<T> result = new Result<>();
+        result.setCode(ResultCodeEnum.SUCCESS.getCode());
+        result.setMsg(ResultCodeEnum.SUCCESS.getMessage());
         return result;
     }
-    //如果想要static方法使用泛型，需要在static<T>
-    public static<T> Result<T> success(T data){
-        return new Result("200","success",data);
 
+    public static <T> Result<T> success(T data) {
+        Result<T> result = new Result<>();
+        result.setCode(ResultCodeEnum.SUCCESS.getCode());
+        result.setMsg(ResultCodeEnum.SUCCESS.getMessage());
+        result.setData(data);
+        return result;
     }
-    //因为失败的可能有很多种，比如404，500 所以需要外部传入
-    public static Result error(String code, String msg){
-        Result result = new Result();
+
+    // 🚀 新增：直接通过枚举返回错误
+    public static <T> Result<T> error(ResultCodeEnum resultCodeEnum) {
+        Result<T> result = new Result<>();
+        result.setCode(resultCodeEnum.getCode());
+        result.setMsg(resultCodeEnum.getMessage());
+        return result;
+    }
+
+    // 🚀 新增：通过枚举返回错误，但允许覆盖默认的错误信息（用于参数校验把具体字段错报出来）
+    public static <T> Result<T> error(ResultCodeEnum resultCodeEnum, String customMessage) {
+        Result<T> result = new Result<>();
+        result.setCode(resultCodeEnum.getCode());
+        result.setMsg(customMessage);
+        return result;
+    }
+
+    // 保留原有的方法，兼容旧代码，避免一次性报错太多
+    public static <T> Result<T> error(String code, String msg) {
+        Result<T> result = new Result<>();
         result.setCode(code);
         result.setMsg(msg);
         return result;
-    }
-    //如果想要static方法使用泛型，需要在static<T>
-    public static<T> Result<T> error(String code,String msg,T data){
-        return new Result(code,msg,data);
-
     }
 
 }

@@ -1,6 +1,7 @@
 package com.cyc.xiangwei.order.controller;
 
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import com.cyc.xiangwei.order.service.StatisticsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
@@ -40,8 +41,11 @@ public class StatisticsController {
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("403", "未登录或非商家账号，无权查看统计数据");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         // 返回包含折线图和饼图双列表的复合结果

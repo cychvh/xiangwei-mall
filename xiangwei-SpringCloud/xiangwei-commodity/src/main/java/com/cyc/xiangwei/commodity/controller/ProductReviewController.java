@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyc.xiangwei.commodity.entity.ProductReview;
 import com.cyc.xiangwei.commodity.service.ProductReviewService;
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +40,7 @@ public class ProductReviewController {
     public Result<?> addReview(@Validated @RequestBody ProductReview review, HttpServletRequest request) {
         Integer userId = getIntegerHeader(request, "userId");
         if (userId == null) {
-            return Result.error("401", "未登录，无法评价");
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
 
         // 删除了 try-catch

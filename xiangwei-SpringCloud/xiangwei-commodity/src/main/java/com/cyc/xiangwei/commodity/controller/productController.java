@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyc.xiangwei.commodity.entity.Product;
 import com.cyc.xiangwei.commodity.service.ProductService;
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 
 
 @RestController
@@ -45,11 +45,11 @@ public class productController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "未登录");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
-        if (type == null || type != 1) {
-            return Result.error("403", "非商家无权访问");
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         LambdaQueryWrapper<Product> query = new LambdaQueryWrapper<>();
@@ -69,10 +69,12 @@ public class productController {
                                  @RequestParam(defaultValue = "") String search,
                                  HttpServletRequest request) {
 
-        String typeStr = request.getHeader("type");
-        // 如果 type 是 1 (商家)，拒绝普通用户列表页的访问。允许 type=0(管理员), type=2(普通用户), 甚至未登录(null)查看
-        if ("1".equals(typeStr)) {
-            return Result.error("403", "商家无权访问买家商品大厅");
+        Integer type = getIntegerHeader(request, "type");
+        if (type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type == 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         LambdaQueryWrapper<Product> query = new LambdaQueryWrapper<>();
@@ -88,9 +90,12 @@ public class productController {
 
     @PutMapping("/admin/update")
     public Result<?> updateFromAdmin(@RequestBody Product product, HttpServletRequest request) {
-        String typeStr = request.getHeader("type");
-        if (!"0".equals(typeStr)) {
-            return Result.error("403", "非管理员无权访问");
+        Integer type = getIntegerHeader(request, "type");
+        if (type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 0) {
+            return Result.error(ResultCodeEnum.FORBIDDEN, "非管理员无权访问");
         }
         Product newProduct = new Product();
         newProduct.setId(product.getId());
@@ -108,7 +113,7 @@ public class productController {
         Product product = productService.getOne(query);
 
         if (product == null || product.getStatus() != 1) {
-            return Result.error("405", "产品不存在或已下架");
+            return Result.error(ResultCodeEnum.NOT_FOUND, "产品不存在或已下架");
         }
         return Result.success(product);
     }
@@ -119,8 +124,12 @@ public class productController {
         String username = request.getHeader("username");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) { return Result.error("401", "未登录"); }
-        if (type == null || type != 1) { return Result.error("403", "非商家无权操作"); }
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
+        }
 
         username = StringUtils.hasText(username) ? username : "商家" + userId;
         productService.addProduct(product, username, userId);
@@ -133,15 +142,14 @@ public class productController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "未登录");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
-        try {
-            productService.deleteProduct(id, type, userId);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        productService.deleteProduct(id, type, userId);
         return Result.success();
     }
 
@@ -151,8 +159,12 @@ public class productController {
         String username = request.getHeader("username");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) { return Result.error("401", "未登录"); }
-
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
+        }
 
         username = StringUtils.hasText(username) ? username : "商家" + userId;
         productService.updateProduct(product, username, userId, type);
@@ -168,16 +180,16 @@ public class productController {
         Integer type = getIntegerHeader(request, "type");
 
         if (userId == null) {
-            return Result.error("401", "未登录");
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
 
         Product dbProduct = productService.getById(id);
         if (dbProduct == null) {
-            return Result.error("404", "商品不存在");
+            return Result.error(ResultCodeEnum.ERROR, "商品不存在");
         }
 
         if (type == null || type != 1 || !userId.equals(dbProduct.getMerchantId())) {
-            return Result.error("403", "无权操作");
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         Product update = new Product();

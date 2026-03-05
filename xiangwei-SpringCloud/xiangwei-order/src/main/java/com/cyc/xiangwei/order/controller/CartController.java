@@ -1,6 +1,7 @@
 package com.cyc.xiangwei.order.controller;
 
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import com.cyc.xiangwei.order.service.CartService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
@@ -39,12 +40,12 @@ public class CartController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "请先登录");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
         // 防止 type 为 null 导致的空指针异常
-        if (type == null || type != 2) {
-            return Result.error("403", "非买家用户无权操作购物车");
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         return cartService.addCart(productId, quantity, userId);
@@ -56,11 +57,11 @@ public class CartController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "请先登录");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
-        if (type == null || type != 2) {
-            return Result.error("403", "非买家用户无权查看购物车");
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         return cartService.getMyCartList(userId);
@@ -72,11 +73,11 @@ public class CartController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null) {
-            return Result.error("401", "请先登录");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
-        if (type == null || type != 2) {
-            return Result.error("403", "非买家用户无权操作购物车");
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         //  进阶安全提示：目前这里是直接根据 cartId 删除。

@@ -3,6 +3,7 @@ package com.cyc.xiangwei.order.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import com.cyc.xiangwei.order.entity.OrderDelivery;
 import com.cyc.xiangwei.order.service.DeliveryService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,10 +41,13 @@ public class DeliveryController {
 
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
 
         // 权限校验：必须登录，且必须是商家 (type == 1)
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("405", "权限不足，非商家无权发货");
+        if ( type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         deliveryService.shipOrder(orderDelivery.getOrderId(), merchantId, orderDelivery.getExpressCompany(), orderDelivery.getExpressNo());
@@ -60,8 +64,11 @@ public class DeliveryController {
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("405", "权限不足，非商家无权查看");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if ( type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         LambdaQueryWrapper<OrderDelivery> wrapper = new LambdaQueryWrapper<>();
@@ -80,14 +87,17 @@ public class DeliveryController {
 
     // 3. 修改物流信息
     @PutMapping("/correct")
-    public Result<?> correctDelivery(@RequestBody OrderDelivery orderDelivery,
+    public Result<?> correctDelivery(@Validated @RequestBody OrderDelivery orderDelivery,
                                      HttpServletRequest request) {
 
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("405", "权限不足，非商家无权修改物流");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if ( type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         // 强制使用当前商户 ID，防止商家篡改别人的物流
@@ -105,19 +115,14 @@ public class DeliveryController {
 
         Integer type = getIntegerHeader(servletRequest, "type");
         if (type == null) {
-            return Result.error("401", "未登录");
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
 
         if (type != 2 && type != 1 && type != 0) {
-            return Result.error("405", "权限不足");
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
-        OrderDelivery delivery = null;
-        try {
-            delivery = deliveryService.getDelivery(orderId);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+        OrderDelivery delivery = deliveryService.getDelivery(orderId);
 
         return Result.success(delivery);
     }

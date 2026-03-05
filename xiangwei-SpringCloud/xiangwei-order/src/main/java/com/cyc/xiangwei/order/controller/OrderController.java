@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyc.xiangwei.common.utils.Result;
+import com.cyc.xiangwei.common.utils.ResultCodeEnum;
 import com.cyc.xiangwei.order.entity.DTO.OrderDTO;
 import com.cyc.xiangwei.order.entity.Order;
 import com.cyc.xiangwei.order.entity.OrderDelivery;
 import com.cyc.xiangwei.order.entity.OrderItem;
 import com.cyc.xiangwei.order.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +51,11 @@ public class OrderController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null || type == null || type != 2) {
-            return Result.error("405", "权限不足，非买家用户");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         IPage<Order> orderByOrderId = orderService.getOrderByOrderId(productName, userId, pageNum, pageSize);
@@ -65,8 +70,11 @@ public class OrderController {
                                HttpServletRequest request) {
 
         Integer type = getIntegerHeader(request, "type");
-        if (type == null || type != 0) {
-            return Result.error("405", "权限不足，非管理员");
+        if (type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 0) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         LambdaQueryWrapper<Order> orderLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -83,15 +91,14 @@ public class OrderController {
         Integer userId = getIntegerHeader(request, "userId");
 
         if (userId == null) {
-            return Result.error("401", "未登录");
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
         }
 
-        try {
-            List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOrderId(orderId, userId);
-            return Result.success(orderItemsByOrderId);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
+
+        List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOrderId(orderId, userId);
+        return Result.success(orderItemsByOrderId);
+
+
     }
 
     // 买家下单
@@ -100,8 +107,11 @@ public class OrderController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null || type == null || type != 2) {
-            return Result.error("405", "权限不足，仅买家可下单");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
 
@@ -122,8 +132,11 @@ public class OrderController {
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("405", "权限不足，非商家无权查看");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         return Result.success(
@@ -137,16 +150,16 @@ public class OrderController {
         Integer merchantId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (merchantId == null || type == null || type != 1) {
-            return Result.error("405", "权限不足，非商家无权查看");
+        if (merchantId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 1) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
-        try {
-            List<OrderItem> items = orderService.getMerchantOrderItems(merchantId, orderId);
-            return Result.success(items);
-        } catch (RuntimeException e) {
-            return Result.error("500", e.getMessage());
-        }
+        List<OrderItem> items = orderService.getMerchantOrderItems(merchantId, orderId);
+        return Result.success(items);
+
     }
 
     // 买家确认收货
@@ -156,20 +169,18 @@ public class OrderController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null || type == null || type != 2) {
-            return Result.error("405", "权限不足");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
 
         if (orderId == null) {
-            return Result.error("500", "订单ID不能为空");
+            return Result.error(ResultCodeEnum.PARAM_ERROR, "订单ID不能为空");
         }
 
-        try {
-            orderService.confirmReceiptService(orderId, userId);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
-
+        orderService.confirmReceiptService(orderId, userId);
         return Result.success("确认收货成功");
     }
 
@@ -179,11 +190,14 @@ public class OrderController {
         Integer userId = getIntegerHeader(request, "userId");
         Integer type = getIntegerHeader(request, "type");
 
-        if (userId == null || type == null || type != 2) {
-            return Result.error("405", "权限不足");
+        if (userId == null || type == null) {
+            return Result.error(ResultCodeEnum.UNAUTHORIZED);
+        }
+        if (type != 2) {
+            return Result.error(ResultCodeEnum.FORBIDDEN);
         }
         if (orderId == null) {
-            return Result.error("500", "订单ID不能为空");
+            return Result.error(ResultCodeEnum.PARAM_ERROR, "订单ID不能为空");
         }
 
         // 您的 after 逻辑目前在 Controller 里是空的，后续可以调用 orderService.after()
