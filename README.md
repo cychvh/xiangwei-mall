@@ -6,6 +6,10 @@
 ![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.5.6-blue.svg)
 ![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D.svg)
 
+**📢 找工作专用通道 / Open to Work**
+> 本项目作者（蔡奕成）目前正在寻找 **Java 开发全职岗位**，支持线上面试，接受跨城入职。
+> 为方便 Boss 直聘的 HR 与技术负责人免积分联系，欢迎直接发邮件至：**3242828406@qq.com** （全天在线，秒回高清 PDF 简历！）
+
 ## 📖 项目简介
 **Xiangwei Mall (乡味商城)** 是一个基于 `Spring Cloud Alibaba` + `Vue 3` 构建的前后端分离微服务电商系统。项目实现了从商品展示、购物车管理、订单流转、物流追踪到售后评价的完整电商闭环，并对管理员、商家、普通用户进行了严格的 RBAC 权限隔离。
 
